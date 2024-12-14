@@ -1,0 +1,61 @@
+.music-player {
+    display: flex;
+    align-items: center; /* Vertically align items */
+    width: 100%;
+    background-color: #364cd9; /* Set a background color for the player area */
+    padding: 10px;
+}
+
+.player-controls {
+    display: flex;
+    align-items: center; /* Align vertically */
+    margin-right: 20px; /* Space from currently playing */
+}
+
+.player-controls button {
+    margin: 0 5px; /* Add some spacing between buttons */
+}
+
+.player-controls input[type="range"] {
+    margin-left: 10px; /* Add some spacing from right button */
+}
+
+.currently-playing {
+    display: flex;
+    align-items: center;
+}
+
+.currently-playing img {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+
+.currently-playing-info {
+    margin-left: 10px;
+}
+
+.song-list {
+    margin-top: 20px;
+}
+
+.song {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.song img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+
+.song-info {
+    margin-left: 10px;
+}
+
+.song-title,
+.song-artist {
+    display: block;
+}
