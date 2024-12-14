@@ -1,0 +1,142 @@
+{% extends 'music/base.html' %}
+
+{% block content %}
+<style>
+      .container-fluid {
+        width: 450px;
+        height: 540px;
+        background-color: #0077b6;
+        margin: 250px auto 0 auto;
+        text-align: center;
+    }
+
+.col-md-4 .text-center h3 {
+  color: #fff;
+  font-size: 3rem;
+  font-family: Verdana, Arial, sans-serif;
+  font-weight: bold;
+  margin-bottom: 20px;
+  margin-top: 30px;
+}
+
+.col-md-4 .form-control {
+    margin-bottom: 3%;
+    border-radius: 6px;
+    border-color: #ced4da;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    font-size: 1rem;
+}
+
+.bg-primary{
+  border-color: #dc3545;
+  box-shadow: 2px 2px 5px rgba(220,53,69,0.2);
+}
+
+.btn-primary{
+ padding: 13px 30px;
+ font-size: 15px;
+ color: #fff;
+ background-color: #CDB4DB;
+ border: none;
+ border-bottom: 4px solid #fff;
+ cursor: pointer;
+ text-align: center;
+ display: inline-block;
+}
+
+.btn-primary:hover{
+ transition: all 0.5s;
+ background: #fff;
+ color: #2c536c;
+}
+
+.text-center{
+  font-family: Verdana, Arial, sans-serif;
+  color: #fff;
+  margin-top: 8%;
+}
+
+.text-primary{
+  font-family: Verdana, Arial, sans-serif;
+  color: white;
+  font-size: 110%;
+}
+@media (max-width: 500px) {
+  .container-fluid {
+    margin: 2rem auto 0;
+    max-width: 90%;
+  }
+  .col-md-4 .text-center h3 {
+    font-size: 1.5rem;
+  }
+}
+</style>
+<div class="container-fluid vh-100" style="margin-top:20px">
+    <div class="" style="margin-top:20px">
+        <div class="rounded d-flex justify-content-center">
+            <div class="col-md-4 col-sm-12 shadow-lg p-5 bg-light">
+                <div class="text-center">
+                    <h3 class="text-primary">Регистрация</h3>
+                </div>
+                <div class="p-4">
+                    <form action="{% url 'register' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-primary"><i
+                                    class="bi bi-person-plus-fill text-white"></i></span>
+                            <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}" name="username" placeholder="Username"
+                            value="{{ form.username.value|default_if_none:'' }}">
+                            <div class="invalid-feedback">
+                                {{ form.username.errors.0 }}
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-primary"><i
+                                    class="bi bi-envelope text-white"></i></span>
+                            <input type="email" name="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}" placeholder="Email"
+                                   value="{{ form.email.value|default_if_none:'' }}">
+                            <div class="invalid-feedback">
+                                {{ form.email.errors.0 }}
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-primary"><i
+                                    class="bi bi-key-fill text-white"></i></span>
+                            <input type="password" name="password" class="form-control {% if form.password.errors %}is-invalid{% endif %}" placeholder="Пароль"
+                                   value="{{ form.password.value|default_if_none:'' }}">
+                            <div class="invalid-feedback">
+                                {{ form.password.errors.0 }}
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-primary"><i
+                                    class="bi bi-key-fill text-white"></i></span>
+                            <input type="password" name="password_confirm" class="form-control {% if form.password_confirm.errors %}is-invalid{% endif %}" placeholder="Повторите пароль"
+                                   value="{{ form.password_confirm.value|default_if_none:'' }}">
+                            <div class="invalid-feedback">
+                                {{ form.password_confirm.errors.0 }}
+                            </div>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-primary"><i class="bi bi-image text-white"></i></span>
+                            <input type="file" class="form-control" name="profile_picture" accept="image/*">
+                            <div class="invalid-feedback">
+                                {% for error in form.profile_picture.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="d-grid col-12 mx-auto">
+                            <button class="btn btn-primary" type="sybmit"><span></span> Зарегистрироваться</button>
+                        </div>
+                        <p class="text-center mt-3">Уже есть аккаунт?
+                             <a class="text-primary" href="/login">Войти</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

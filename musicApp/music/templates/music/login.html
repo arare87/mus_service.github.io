@@ -1,0 +1,120 @@
+{% extends 'music/base.html' %}
+
+{% block content %}
+<style>
+    .container-fluid {
+        width: 450px;
+        height: 450px;
+        background-color: #0077b6;
+        margin: 250px auto 0 auto;
+        text-align: center;
+    }
+
+input[type="text"],input[type="password"]{
+ width: 300px;
+ height:50px;
+ font-size: 18px;
+ margin: 30px 5px;
+ border-radius: 4px;
+ padding-left: 10px;
+}
+
+.d-grid {
+  text-align: center;
+}
+
+.btn-primary{
+ padding: 13px 30px;
+ font-size: 15px;
+ color: #fff;
+ background-color: #CDB4DB;
+ border: none;
+ border-bottom: 4px solid #fff;
+ cursor: pointer;
+ text-align: center;
+ display: inline-block;
+}
+
+.btn-primary:hover{
+ transition: all 0.5s;
+ background: #fff;
+ color: #2c536c;
+}
+
+.col-md-4 .text-center h3 {
+  color: #fff;
+  font-size: 3rem;
+  font-family: Verdana, Arial, sans-serif;
+  font-weight: bold;
+  margin-bottom: 20px;
+  margin-top: 30px;
+}
+
+.text-center{
+  font-family: Verdana, Arial, sans-serif;
+  color: #fff;
+  margin-top: 8%;
+}
+
+.text-primary{
+  font-family: Verdana, Arial, sans-serif;
+  color: white;
+  font-size: 110%;
+}
+
+@media (max-width: 500px) {
+    .container-fluid{
+        margin: 2rem auto 0;
+        max-width: 90%;
+    }
+    input[type="text"],
+    input[type="password"]{
+        max-width: 100%;
+    }
+    .col-md-4 .text-center h3{
+        font-size: 1.5rem;
+    }
+}
+</style>
+<div class="container-fluid vh-100" style="margin-top:20px">
+    <div class="" style="margin-top:20px">
+        <div class="rounded d-flex justify-content-center">
+            <div class="col-md-4 col-sm-12 shadow-lg p-5 bg-light">
+                <div class="text-center">
+                    <h3 class="text-primary">Авторизация</h3>
+                </div>
+                <div class="p-4">
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                              {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <form action="{% url 'login' %}" method="post">
+                        {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-primary"><i
+                                    class="bi bi-person-plus-fill text-white"></i></span>
+                            <input type="text" class="form-control" name="username" placeholder="Username">
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-primary"><i
+                                    class="bi bi-key-fill text-white"></i></span>
+                            <input type="password" class="form-control" name="password" placeholder="Пароль">
+                        </div>
+
+                        <div class="d-grid col-12 mx-auto">
+                            <button class="btn btn-primary" type="submit"><span></span> Войти</button>
+                        </div>
+                        <p class="text-center mt-3">Нет аккаунта?
+                            <a class="text-primary" href="/register">Регистрация</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

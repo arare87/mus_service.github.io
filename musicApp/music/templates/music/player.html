@@ -1,0 +1,244 @@
+{% extends 'music/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+    .music-player {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background-color: #0077b6;
+    padding: 10px;
+    height: 60px;
+}
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    margin-right: 40px;
+    flex: 0.42;
+
+}
+
+.player-controls button {
+    margin: 0 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-size: 1.9em;
+}
+
+.player-controls input[type="range"] {
+    margin-left: 10px;
+    flex: 1;
+    width: 15px;
+}
+
+.currently-playing {
+    display: flex;
+    align-items: center;
+    margin-left: 80px;
+}
+
+.currently-playing img {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+
+.currently-playing-info {
+    margin-left: 10px;
+}
+
+.control-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    margin: 0 5px;
+}
+
+.control-button i {
+    font-size: 20px;
+    color: white;
+}
+
+.control-button:hover {
+    opacity: 0.8;
+}
+
+.progress-container {
+    width: 400px;
+    height: 10px;
+    background-color: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    align-items: center;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #CDB4DB;
+    width: 0%;
+    border-radius: 5px;
+}
+
+.search-container {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.search-container input[type="text"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 40%;
+  box-sizing: border-box;
+}
+
+.search-container button[type="submit"] {
+  padding: 8px 12px;
+  background-color: #CDB4DB;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.search-results ul {
+  list-style: none;
+  padding: 0;
+}
+
+.search-results li {
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.search-results li:hover {
+  background-color: #f0f0f0;
+}
+
+.song-list {
+    margin-top: 1%;
+    margin-left: 1%;
+}
+
+.song {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.song img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+
+.song-info {
+    margin-left: 10px;
+}
+
+.song-title,
+.song-artist {
+    display: block;
+}
+
+@media (max-width: 768px) {
+  .player-controls {
+    flex-direction: column;
+    align-items: center;
+    margin-right: 0;
+  }
+
+  .player-controls button {
+    margin: 0.5rem 0;
+    font-size: 1.5rem;
+  }
+
+  .player-controls input[type="range"] {
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+
+  .currently-playing {
+    flex-direction: column;
+    align-items: center;
+    margin-left: 0;
+  }
+
+  .currently-playing img {
+      margin-bottom: 0.5rem;
+  }
+
+  .currently-playing-info {
+    margin-left: 0;
+    text-align: center;
+  }
+
+  .search-container input[type="text"] {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  .song img{
+    max-width: 40px;
+    margin-right: 0.5rem;
+  }
+}
+
+.song-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.song-image {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+</style>
+    <div class="music-player">
+        <div class="player-controls">
+            <button id="prev" class="control-button"><i class="fas fa-step-backward"></i></button>
+            <button id="play-pause" class="control-button"><i id="play-pause-icon" class="fas fa-play"></i></button>
+            <button id="next" class="control-button"><i class="fas fa-step-forward"></i></button>
+            <button id="download" class="control-button"><i class="fas fa-download"></i></button>
+            <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="currently-playing">
+            <img id="currently-playing-image" src="" alt="Currently Playing">
+            <div class="currently-playing-info">
+                <span id="currently-playing-title"></span>
+                <span id="currently-playing-artist"></span>
+            </div>
+        </div>
+        <audio id="main-audio-player" preload="auto"></audio>
+    </div>
+     <div class="search-container">
+        <form id="search-form">
+            <input type="text" id="search-input" placeholder="Search by title or artist">
+            <button type="submit">Search</button>
+        </form>
+        <div id="search-results"></div>
+    </div>
+    <div class="song-list">
+        {% for song in page_obj %}
+            <div class="song" data-song-url="{{ song.audio_file.url }}" data-song-title="{{ song.title }}" data-song-artist="{{ song.artist }}" data-song-image="{{ song.image.url }}">
+                <img src="{{ song.image.url }}" alt="{{ song.title }}">
+                <div class="song-info">
+                    <span class="song-title">{{ song.title }}</span>
+                    <span class="song-artist">{{ song.artist }}</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

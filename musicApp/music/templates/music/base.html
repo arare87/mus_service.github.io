@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <title>Music service</title>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.7/mediaelementplayer.min.css">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.7/mediaelement-and-player.min.js"></script>
+    <style>
+body {
+	 font-family: Verdana, Arial, sans-serif;
+     font-size: 15px;
+		}
+header {
+  background-color: #BDE0FE;
+  padding: 0.2rem 0.8rem; ;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+header img {
+  max-width: 5%;
+  max-height: 5%;
+  margin-right: 5rem;
+}
+
+.horizontal-nav {
+  color: #3A3A00;
+  font-size: 130%;
+  margin: 0;
+  text-decoration: none;
+  display: flex;
+  list-style: none;
+  padding: 0;
+  justify-content: flex-start;
+}
+
+.horizontal-nav li {
+  margin: 0 2rem;
+}
+
+.horizontal-nav a {
+  color: #002323;
+  font-size: 120%;
+  text-decoration: none;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  font-size: 1.2em;
+  vertical-align: middle;
+  color: #002323;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: #CDB4DB;
+}
+
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px #cbd6ee;
+}
+
+  .col-md-3 {
+    margin-bottom: 0.3rem;
+    justify-content: center;
+  }
+
+.profile-pic {
+  max-width: 40px;
+  height: auto;
+  border-radius: 50%;
+  margin-right: 20px;
+  margin-left: 20px;
+  display: inline-block;
+}
+
+@media (max-width: 768px) {
+  header img {
+    max-width: 80px;
+    margin-right: 0.5rem;
+  }
+  .horizontal-nav {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
+  }
+  .horizontal-nav li {
+    margin: 0.5rem 0;
+  }
+  .horizontal-nav a {
+      display: block;
+      text-align: center;
+      width: 100%;
+      box-sizing: border-box;
+  }
+  .btn{
+      width: 100%;
+      text-align: center;
+  }
+
+  .profile-pic{
+      max-width: 30px;
+      margin: 0 auto 1rem;
+      display: block;
+  }
+}
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+      <img src="/media/admin.png" alt="Your Website Logo">
+      <a href="/" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
+        <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+      </a>
+      <ul class="nav  horizontal-nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+        <li><a href="{% url 'songs' %}" class="nav-link px-2 link-secondary">Главная страница</a></li>
+        <li><a href="{% url 'genres' %}" class="nav-link px-2 link-dark">Подборки</a></li>
+        <li><a href="{% url 'profile' %}" class="nav-link px-2 link-dark">Личный кабинет</a></li>
+      </ul>
+      <div class="col-md-3 text-end">
+       {% if user.is_authenticated %}
+         <div class="d-flex align-items-center">
+           <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="profile-pic">
+           <a href="{% url 'logout' %}" class="btn btn-primary ml-2">Выход</a>
+         </div>
+      {% else %}
+         <a href="{% url 'login' %}" class="btn btn-outline-primary me-2">Вход</a>
+         <a href="{% url 'register' %}" class="btn btn-primary">Регистрация</a>
+      {% endif %}
+     </div>
+    </header>
+  </div>
+    {% block content %}
+      {% include 'player.html' %}
+      {% include 'profile.html' %}
+      {% include 'login.html' %}
+      {% include 'registration.html' %}
+      {% include 'compilations.html' %}
+    {% endblock %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const audioPlayer = document.getElementById('main-audio-player');
+  const playPauseButton = document.getElementById('play-pause');
+  const playPauseIcon = document.getElementById('play-pause-icon');
+  const prevButton = document.getElementById('prev');
+  const nextButton = document.getElementById('next');
+  const downloadButton = document.getElementById('download');
+  const volumeSlider = document.getElementById('volume');
+  const progressBar = document.querySelector('.progress-bar');
+  const songList = document.querySelector('.song-list');
+  let songQueue = [];
+  let currentSongIndex = -1;
+
+   audioPlayer.addEventListener('playing', () => {
+      if (currentSongIndex !== -1) { //Check if a song is actually playing
+          updateListeningHistory(songQueue[currentSongIndex].url);
+      }
+  });
+  const createSongObject = (songElement) => {
+    return {
+      url: songElement.dataset.songUrl,
+      title: songElement.dataset.songTitle,
+      artist: songElement.dataset.songArtist,
+      image: songElement.dataset.songImage,
+    };
+  };
+  const songElements = Array.from(songList.querySelectorAll('.song'));
+  songQueue = songElements.map(createSongObject);
+
+    function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+  function updateListeningHistory(songUrl) {
+  console.log("songUrl:", songUrl);
+  fetch('/update_listening_history/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: new URLSearchParams({ song_url: songUrl }) // Correctly formatted body
+  })
+  .then(response => {
+    if (!response.ok) {
+        response.json().then(data => { //Attempt to parse JSON response for better error information
+            console.error("Error updating listening history:", response.status, response.statusText, data);
+        }).catch(error => {
+            console.error("Error parsing error response:", error);
+        });
+    }
+})
+  .catch(error => {
+    console.error("Network error:", error);
+  });
+}
+  const playSong = (index) => {
+    if (index >= 0 && index < songQueue.length) {
+        const song = songQueue[index];
+      audioPlayer.src = song.url;
+      audioPlayer.play();
+      document.querySelector('.currently-playing img').src = song.image;
+      document.getElementById('currently-playing-title').textContent = song.title;
+      document.getElementById('currently-playing-artist').textContent = song.artist;
+      currentSongIndex = index;
+      updatePlayPauseButton();
+      updateProgressBar(); // Added to update progress
+    }
+  };
+
+  songList.addEventListener('click', (event) => {
+      if (event.target.closest('.song')) {
+          const songElement = event.target.closest('.song');
+          const index = songElements.indexOf(songElement);
+          playSong(index); // Correctly play song
+      }
+  });
+
+  prevButton.addEventListener('click', () => playSong((currentSongIndex - 1 + songQueue.length) % songQueue.length));
+  nextButton.addEventListener('click', () => playSong((currentSongIndex + 1) % songQueue.length));
+
+  volumeSlider.addEventListener('input', () => {
+    audioPlayer.volume = volumeSlider.value;
+  });
+
+    const updatePlayPauseButton = () => {
+    playPauseIcon.classList.toggle('fa-play', audioPlayer.paused);
+    playPauseIcon.classList.toggle('fa-pause', !audioPlayer.paused);
+  };
+
+    playPauseButton.addEventListener('click', () => {
+        if (audioPlayer.paused)
+        {
+            audioPlayer.play();
+            playPauseIcon.classList.remove('fa-play');
+            playPauseIcon.classList.add('fa-pause');
+        } else {
+            audioPlayer.pause();
+            playPauseIcon.classList.remove('fa-pause');
+            playPauseIcon.classList.add('fa-play');
+        }
+    });
+  const updateProgressBar = () =>{
+      if(!audioPlayer.paused){
+          const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+          progressBar.style.width = progressPercent + '%';
+      }
+  }
+
+  audioPlayer.addEventListener('timeupdate', updateProgressBar);
+  audioPlayer.addEventListener('ended', () => {
+      playSong((currentSongIndex + 1) % songQueue.length); // Play next song when current song ends
+      updatePlayPauseButton();
+  });
+  audioPlayer.addEventListener('error', (error) => {
+    console.error('Audio error:', error);
+    document.getElementById('currently-playing-title').textContent = "Ошибка при загрузке звука.";
+  });
+
+  downloadButton.addEventListener('click', () => {
+    const currentSong = songQueue[currentSongIndex];
+    if (currentSong) {
+      const a = document.createElement('a');
+      a.href = currentSong.url;
+      a.download = currentSong.title + '.mp3';
+      a.click();
+    }
+  })
+    const searchForm = document.getElementById('search-form');
+    const searchInput = document.getElementById('search-input');
+    const searchResults = document.getElementById('search-results');
+
+        searchForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const searchTerm = searchInput.value.toLowerCase();
+        searchResults.innerHTML = '';
+
+        const filteredSongs = songQueue.filter(song => {
+            return song.title.toLowerCase().includes(searchTerm) || song.artist.toLowerCase().includes(searchTerm);
+        });
+
+        if (filteredSongs.length > 0) {
+            const songList = document.createElement('ul');
+            songList.classList.add('song-list');
+
+            filteredSongs.forEach(song => {
+                const listItem = createSongListItem(song);
+                songList.appendChild(listItem);
+            });
+            searchResults.appendChild(songList);
+        } else {
+            searchResults.innerHTML = '<p class="no-results">No songs found.</p>';
+        }
+    });
+
+    // Function to create list items (now with images)
+    function createSongListItem(song) {
+        const listItem = document.createElement('li');
+        listItem.classList.add('song-item');
+        listItem.innerHTML = `
+            <img src="${song.image}" alt="${song.title} Album Art" class="song-image">
+            <div class="song-info">
+                <strong class="song-title">${song.title}</strong>
+                <span class="song-artist">${song.artist}</span>
+            </div>
+        `;
+        listItem.addEventListener('click', () => {
+            const index = songQueue.findIndex((s) => s.title.toLowerCase() === song.title.toLowerCase() && s.artist.toLowerCase() === song.artist.toLowerCase());
+            if (index > -1) {
+                playSong(index);
+            } else {
+                console.error("Could not find song to play");
+            }
+        });
+        return listItem;
+    }
+       if (songQueue.length > 0) {
+       playSong(0);
+   }
+});
+</script>
+</body>
+</html>

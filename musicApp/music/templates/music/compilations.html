@@ -1,0 +1,132 @@
+{% extends 'music/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+.genre-button {
+  background-color: #CDB4DB;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.song {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.song img {
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+}
+
+h1 {
+  font-family: Verdana, Arial, sans-serif;
+  color: #0D3049;
+  font-size: 2.5em;
+  margin-bottom: 30px;
+  padding-bottom: 10px;
+  margin-left: 1%;
+}
+
+.song-title {
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #333;
+    margin-right: 1.2%;
+}
+
+.song-artist {
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 1em;
+    font-style: italic;
+    color: #333;
+}
+
+@media (max-width: 768px) {
+  .song {
+    flex-direction: column;
+    align-items: center;
+  }
+  .song img {
+    margin-bottom: 1rem;
+  }
+    .song-title{
+        flex-basis: auto;
+        margin-bottom: 0.5rem;
+    }
+    .song-artist{
+        flex-basis: auto;
+    }
+
+    h1{
+        font-size: 1.8rem;
+    }
+}
+</style>
+<div class="genre-selection">
+    {% csrf_token %}
+  <h1>Выберите жанр песни</h1>
+  <div class="genre-buttons">
+      {% for genre in genres %}
+        <button class="genre-button" data-genre="{{ genre }}">{{ genre }}</button>
+      {% endfor %}
+  </div>
+  <div id="song-list-container">
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const genreButtons = document.querySelectorAll('.genre-button');
+    const songListContainer = document.getElementById('song-list-container');
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    genreButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const genre = button.dataset.genre;
+            fetch('/get_songs/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrftoken,
+                },
+                body: `genre=${genre}`,
+            })
+            .then(response => response.json())
+            .then(data => {
+                songListContainer.innerHTML = '';
+                if (data.songs){
+                    data.songs.forEach(song => {
+                        const songElement = `
+                            <div class="song">
+                              <img src="${song.image}" alt="${song.title}">
+                              <h3 class="song-title">${song.title}</h3>
+                              <p class="song-artist">${song.artist}</p>
+                            </div>
+                        `;
+                        songListContainer.innerHTML += songElement;
+                    });
+                } else {
+                    songListContainer.innerHTML = '<p>No songs found for this genre.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching songs:', error);
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
